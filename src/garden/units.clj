@@ -404,20 +404,26 @@
 
 ;;; String
 
-(def ^{:private true
-       :doc "Regular expression for matching a CSS unit. The magnitude
+(def
+  ^{:private true
+    :doc "Regular expression for matching a CSS unit. The magnitude
   and unit are captured."}
   unit-re
-  #"([+-]?\d+(?:\.?\d+)?)(p[xtc]|in|[cm]m|%|r?em|ex|ch|v(?:[wh]|m(?:in|ax))|deg|g?rad|turn|m?s|k?Hz|dp(?:i|cm|px))")
+  #"([+-]?\d+(?:\.?\d+)?)(p[xtc]|in|[cm]m|%|r?em|ex|ch|v(?:[wh]|m(?:in|ax))|deg|g?rad|turn|m?s|k?Hz|dp(?:i|cm|px))?")
 
 (defn ^Unit parse-unit [s]
   (let [s' (string/trim s)]
     (if-let [[_ ^String magnitude measurement] (re-matches unit-re s')]
       (let [magnitude (if (.contains magnitude ".")
                         (Double/parseDouble magnitude)
-                        (Long/parseLong magnitude))]
-        (Unit. magnitude measurement)))))
-
+                        (Long/parseLong magnitude))
+            measurement (and measurement
+                             (keyword measurement))]
+        (Unit. magnitude measurement))
+      (throw (ex-info (str "Unable to convert " (pr-str s) " to Unit")
+                      {:given s
+                       :expected
+                       `(~'re-matches ~unit-re ~s)})))))
 
 (extend-type String
   IUnit
@@ -432,6 +438,8 @@
   (-measurement [this]
     (.-measurement ^Unit (parse-unit this))))
 
+
+;;; Keyword
 
 (extend-type clojure.lang.Keyword
   IUnit
