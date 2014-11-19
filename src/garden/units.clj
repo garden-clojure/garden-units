@@ -65,6 +65,7 @@
                 i# (convert mg# ms# ~sk)]
             (Unit. i# ~rep))))))
 
+
 ;;; Conversion
 
 (def
@@ -96,7 +97,12 @@
                            (pr-str m1)
                            " to "
                            (pr-str m2))
-                      {:given [amt m1 m2]})))))
+                      {:given [amt m1 m2]
+                       :expected
+                       (let [candidates (-> (get @conversion-table m1)
+                                            (keys)
+                                            (set))]
+                         `(~'contains? ~candidates ~m2))})))))
 
 
 ;;; Arithemetic
