@@ -401,6 +401,19 @@
   IMeasurement
   (-measurement [this] nil))
 
+;;; Ratio
+
+(extend-type clojure.lang.Ratio
+  IUnit
+  (-unit [this]
+    (Unit. this nil))
+
+  IMagnitude
+  (-magnitude [this] this)
+
+  IMeasurement
+  (-measurement [this] nil))
+
 
 ;;; String
 
