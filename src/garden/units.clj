@@ -1,4 +1,5 @@
 (ns garden.units
+  "Utilities for working with units."
   (:refer-clojure :exclude [rem + * - /])
   (:require
    [clojure.core :as clj]
@@ -37,19 +38,26 @@
 ;; ---------------------------------------------------------------------
 ;; Functions
 
-(defn magnitude [x]
+(defn magnitude
+  "Return the magnitude of x. x must satisfy IMeasurement."
+  [x]
   {:post [(number? %)]}
   (-magnitude x))
 
-(defn measurement [x]
+(defn measurement
+  "Return the measurement type of x. x must satisfy IMeasurement."
+  [x]
   (when-let [m (-measurement x)]
     (keyword m)))
 
-(defn unit [x]
+(defn unit
+  "Return x as an instance of Unit. x must satisfy IUnit."
+  [x]
   {:post [(instance? Unit %)]}
   (-unit x))
 
 (defmacro defunit
+  "Define a unit constructor function named sym."
   ([sym]
      (let [sk (keyword sym)]
        `(defn ~sym [x#]
@@ -74,36 +82,60 @@
   conversion-table
   (atom {}))
 
-(defn add-conversion! [m1 m2 amt]
+(defn add-conversion!
+  "Add a bidirection measurement conversion between to units m1 and m2
+  with amount amt. amt represents one unit of m1 with respect to m2."
+  [m1 m2 amt]
   (let [m1k (keyword m1)
         m2k (keyword m2)]
     (swap! conversion-table
            (fn [ct]
              (-> ct
                  (assoc-in [m1k m2k] amt)
-                 (assoc-in [m2k m1k] (/ 1.0 amt)))))))
+                 (assoc-in [m2k m1k] (clj// 1.0 amt)))))))
 
-(defn get-conversion [m1 m2]
-  (get-in @conversion-table [m1 m2]))
-
-(defn convert [amt m1 m2]
+(defn get-conversion
+  "Return the conversion amount of one unit of m1 with respect to
+  m2. If either m1 or m2 or both are nil the result will be 1."
+  [m1 m2]
   (if (or (= m1 m2)
           (nil? m1)
           (nil? m2))
-    amt
-    (if-let [c (get-conversion m1 m2)]
-      (* c amt)
-      (throw (ex-info (str "Unable to convert measurement "
-                           (pr-str m1)
-                           " to "
-                           (pr-str m2))
-                      {:given [amt m1 m2]
-                       :expected
-                       (let [candidates (-> (get @conversion-table m1)
-                                            (keys)
-                                            (set))]
-                         `(~'contains? ~candidates ~m2))})))))
+    1
+    (get-in @conversion-table [m1 m2])))
 
+(defn convert
+  "Convert an amount amt of measurement m1 to and amount of
+  measurement m2. If either m1 or m2 or both are nil result will be
+  equal to amt.
+
+
+  Example:
+
+    (convert 2 :in :px)
+    => 192
+
+    (convert 1 :px :in)
+    => 0.010416666666666666
+
+    (convert 42 nil :px)
+    => 42
+
+    (convert 42 nil nil)
+    => 42"
+  [amt m1 m2]
+  (if-let [c (get-conversion m1 m2)]
+    (clj/* c amt)
+    (throw (ex-info (str "Unable to convert measurement "
+                         (pr-str m1)
+                         " to "
+                         (pr-str m2))
+                    {:given [amt m1 m2]
+                     :expected
+                     (let [candidates (-> (get @conversion-table m1)
+                                          (keys)
+                                          (set))]
+                       `(~'contains? ~candidates ~m2))}))))
 
 ;;; Arithemetic
 
