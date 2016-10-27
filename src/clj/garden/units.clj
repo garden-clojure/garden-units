@@ -34,6 +34,11 @@
   (-magnitude [this]
     (.-magnitude this)))
 
+(defn unit?
+  "true if `x` is an instance of `Unit`, false otherwise."
+  [x]
+  (instance? Unit x))
+
 
 ;; ---------------------------------------------------------------------
 ;; Functions
@@ -59,19 +64,19 @@
 (defmacro defunit
   "Define a unit constructor function named sym."
   ([sym]
-     (let [sk (keyword sym)]
-       `(defn ~sym [x#]
-          (let [mg# (magnitude x#)
-                ms# (measurement x#)
-                i# (convert mg# ms# ~sk)]
-            (Unit. i# ~sk)))))
-  ([sym rep]
-     (let [sk (keyword rep)]
-       `(defn ~sym [x#]
-          (let [mg# (magnitude x#)
-                ms# (measurement x#)
-                i# (convert mg# ms# ~sk)]
-            (Unit. i# ~rep))))))
+   (let [measurement (keyword sym)]
+     `(defn ~sym [x#]
+        (let [mg# (magnitude x#)
+              ms# (measurement x#)
+              i# (convert mg# ms# ~measurement)]
+          (Unit. i# ~measurement)))))
+  ([sym unit-name]
+   (let [measurement (keyword unit-name)]
+     `(defn ~sym [x#]
+        (let [mg# (magnitude x#)
+              ms# (measurement x#)
+              i# (convert mg# ms# ~measurement)]
+          (Unit. i# ~measurement))))))
 
 
 ;;; Conversion

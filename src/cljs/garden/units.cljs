@@ -37,6 +37,12 @@
     (.-magnitude this)))
 
 
+(defn unit?
+  "true if `x` is an instance of `Unit`, false otherwise."
+  [x]
+  (instance? Unit x))
+
+
 ;; ---------------------------------------------------------------------
 ;; Functions
 

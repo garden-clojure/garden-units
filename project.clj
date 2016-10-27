@@ -1,4 +1,4 @@
-(defproject garden/garden-units "0.1.0-SNAPSHOT"
+(defproject garden/garden-units "1.0.0-SNAPSHOT"
   :description "Utilities for working with units"
   :url "http://github.com/garden-clojure/garden-units"
   :license {:name "Eclipse Public License"
