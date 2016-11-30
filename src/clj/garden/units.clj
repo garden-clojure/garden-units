@@ -65,14 +65,18 @@
   "Define a unit constructor function named sym."
   ([sym]
    (let [measurement (keyword sym)]
-     `(defn ~sym [x#]
+     `(defn ~sym
+        {:arglists '~'([n])}
+        [x#]
         (let [mg# (magnitude x#)
               ms# (measurement x#)
               i# (convert mg# ms# ~measurement)]
           (Unit. i# ~measurement)))))
   ([sym unit-name]
    (let [measurement (keyword unit-name)]
-     `(defn ~sym [x#]
+     `(defn ~sym
+        {:arglists '~'([n])}
+        [x#]
         (let [mg# (magnitude x#)
               ms# (measurement x#)
               i# (convert mg# ms# ~measurement)]
