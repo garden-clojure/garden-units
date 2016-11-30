@@ -16,7 +16,10 @@
 (def gen-number
   (gen/one-of [gen/int
                (gen/double* {:infinite? false
-                             :NaN? false})]))
+                             :NaN? false
+                             ;; To avoid producing an infinite numbers.
+                             :min -1e6
+                             :max 1e6})]))
 
 (defspec addition-of-args-w-measurement-is-eq-to-unit-of-addition-w-nums
   (prop/for-all [x gen-number

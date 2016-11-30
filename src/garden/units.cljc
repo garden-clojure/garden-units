@@ -2,10 +2,17 @@
   "Utilities for working with units."
   (:refer-clojure :exclude [rem + * - /])
   (:require
-   [cljs.core :as clj]
+   #?(:clj
+      [clojure.core :as clj]
+      :cljs
+      [cljs.core :as clj])
    [clojure.string :as string])
-  (:require-macros
-   [garden.units :refer [defunit]]))
+  #?(:cljs
+     (:require-macros
+      [garden.units :refer [defunit]]))
+  #?(:clj
+     (:import
+      (clojure.lang Keyword))))
 
 ;; ---------------------------------------------------------------------
 ;; Protocols
@@ -49,7 +56,8 @@
 (defn magnitude
   "Return the magnitude of x. x must satisfy IMeasurement."
   [x]
-  {:post [(number? %)]}
+  {:post [(number? %)
+          #?(:clj (Double/isFinite %))]}
   (-magnitude x))
 
 (defn measurement
@@ -63,6 +71,29 @@
   [x]
   {:post [(instance? Unit %)]}
   (-unit x))
+
+
+#?(:clj
+   (defmacro defunit
+     "Define a unit constructor function named sym."
+     ([sym]
+      (let [measurement (keyword sym)]
+        `(defn ~sym
+           {:arglists '~'([n])}
+           [x#]
+           (let [mg# (magnitude x#)
+                 ms# (measurement x#)
+                 i# (convert mg# ms# ~measurement)]
+             (Unit. i# ~measurement)))))
+     ([sym unit-name]
+      (let [measurement (keyword unit-name)]
+        `(defn ~sym
+           {:arglists '~'([n])}
+           [x#]
+           (let [mg# (magnitude x#)
+                 ms# (measurement x#)
+                 i# (convert mg# ms# ~measurement)]
+             (Unit. i# ~measurement)))))))
 
 
 ;;; Conversion
@@ -150,21 +181,20 @@
     (+ (cm 5) (in 5) (mm 5))
     => #garden.units.Unit{:magnitude 18.2, :measurement :cm}"
   ([]
-     (unit 0))
+   (unit 0))
   ([u]
-     (unit u))
+   (unit u))
   ([u1 u2]
-     (let [mg1 (magnitude u1)
-           mg2 (magnitude u2)
-           ms1 (or (measurement u1)
-                   (measurement u2))
-           ms2 (or (measurement u2)
-                   (measurement u1))
-           mg3 (convert mg2 ms2 ms1)]
-       (Unit. (clj/+ mg1 mg3) (or ms1 ms2))))
+   (let [mg1 (magnitude u1)
+         mg2 (magnitude u2)
+         ms1 (or (measurement u1)
+                 (measurement u2))
+         ms2 (or (measurement u2)
+                 (measurement u1))
+         mg3 (convert mg2 ms2 ms1)]
+     (Unit. (clj/+ mg1 mg3) (or ms1 ms2))))
   ([u1 u2 & more]
-     (reduce + (+ u1 u2) more)))
-
+   (reduce + (+ u1 u2) more)))
 
 (defn ^Unit *
   "Return the product of units. The leftmost multiplicand with a
@@ -186,21 +216,20 @@
     (* (cm 5) (in 5) (mm 5))
     => #garden.units.Unit{:magnitude 31.75, :measurement :cm}"
   ([]
-     (unit 1))
+   (unit 1))
   ([u]
-     (unit u))
+   (unit u))
   ([u1 u2]
-     (let [mg1 (magnitude u1)
-           mg2 (magnitude u2)
-           ms1 (or (measurement u1)
-                   (measurement u2))
-           ms2 (or (measurement u2)
-                   (measurement u1))
-           mg3 (convert mg2 ms2 ms1)]
-       (Unit. (clj/* mg1 mg3) (or ms1 ms2))))
+   (let [mg1 (magnitude u1)
+         mg2 (magnitude u2)
+         ms1 (or (measurement u1)
+                 (measurement u2))
+         ms2 (or (measurement u2)
+                 (measurement u1))
+         mg3 (convert mg2 ms2 ms1)]
+     (Unit. (clj/* mg1 mg3) (or ms1 ms2))))
   ([u1 u2 & more]
-     (reduce * (* u1 u2) more)))
-
+   (reduce * (* u1 u2) more)))
 
 (defn ^Unit -
   "Return the difference of units. The leftmost minuend or subtrahend
@@ -223,19 +252,18 @@
     (- (cm 5) (in 5) (mm 5))
     => #garden.units.Unit{:magnitude -8.2, :measurement :cm}"
   ([u]
-     (update-in (unit u) [:magnitude] clj/-))
+   (update-in (unit u) [:magnitude] clj/-))
   ([u1 u2]
-     (let [mg1 (magnitude u1)
-           mg2 (magnitude u2)
-           ms1 (or (measurement u1)
-                   (measurement u2))
-           ms2 (or (measurement u2)
-                   (measurement u1))
-           mg3 (convert mg2 ms2 ms1)]
-       (Unit. (clj/- mg1 mg3) (or ms1 ms2))))
+   (let [mg1 (magnitude u1)
+         mg2 (magnitude u2)
+         ms1 (or (measurement u1)
+                 (measurement u2))
+         ms2 (or (measurement u2)
+                 (measurement u1))
+         mg3 (convert mg2 ms2 ms1)]
+     (Unit. (clj/- mg1 mg3) (or ms1 ms2))))
   ([u1 u2 & more]
-     (reduce - (- u1 u2) more)))
-
+   (reduce - (- u1 u2) more)))
 
 (defn ^Unit /
   "Return the quotient of units. The leftmost dividend or divisor with
@@ -257,18 +285,18 @@
     (/ (cm 5) (in 5) (mm 5)) 
     => #garden.units.Unit{:magnitude 0.7874015748031497, :measurement :cm}"
   ([u]
-     (update-in (unit u) [:magnitude] clj//))
+   (update-in (unit u) [:magnitude] clj//))
   ([u1 u2]
-     (let [mg1 (magnitude u1)
-           mg2 (magnitude u2)
-           ms1 (or (measurement u1)
-                   (measurement u2))
-           ms2 (or (measurement u2)
-                   (measurement u1))
-           mg3 (convert mg2 ms2 ms1)]
-       (Unit. (clj// mg1 mg3) (or ms1 ms2))))
+   (let [mg1 (magnitude u1)
+         mg2 (magnitude u2)
+         ms1 (or (measurement u1)
+                 (measurement u2))
+         ms2 (or (measurement u2)
+                 (measurement u1))
+         mg3 (convert mg2 ms2 ms1)]
+     (Unit. (clj// mg1 mg3) (or ms1 ms2))))
   ([u1 u2 & more]
-     (reduce / (/ u1 u2) more)))
+   (reduce / (/ u1 u2) more)))
 
 ;; ---------------------------------------------------------------------
 ;; Predefined units
@@ -363,17 +391,41 @@
 ;; ---------------------------------------------------------------------
 ;; Protocol implementation
 
+#?(:clj
+   (extend-type Number
+     IUnit
+     (-unit [this]
+       (Unit. this nil))
 
-(extend-type number
-  IUnit
-  (-unit [this]
-    (Unit. this nil))
+     IMagnitude
+     (-magnitude [this] this)
 
-  IMagnitude
-  (-magnitude [this] this)
+     IMeasurement
+     (-measurement [this] nil))
 
-  IMeasurement
-  (-measurement [this] nil))
+   :cljs
+   (extend-type number
+     IUnit
+     (-unit [this]
+       (Unit. this nil))
+
+     IMagnitude
+     (-magnitude [this] this)
+
+     IMeasurement
+     (-measurement [this] nil)))
+
+#?(:clj
+   (extend-type clojure.lang.Ratio
+     IUnit
+     (-unit [this]
+       (Unit. this nil))
+
+     IMagnitude
+     (-magnitude [this] this)
+
+     IMeasurement
+     (-measurement [this] nil)))
 
 ;;; String
 
@@ -384,11 +436,15 @@
   unit-re
   #"([+-]?\d+(?:\.?\d+(?:[eE][+-]?\d+)?)?)(p[xtc]|in|[cm]m|%|r?em|ex|ch|v(?:[wh]|m(?:in|ax))|deg|g?rad|turn|m?s|k?Hz|dp(?:i|cm|px))?")
 
-
 (defn ^Unit parse-unit [s]
   (let [s' (string/trim s)]
     (if-let [[_ magnitude measurement] (re-matches unit-re s')]
-      (let [magnitude (js/parseFloat magnitude) 
+      (let [magnitude #?(:clj
+                         (if (.contains magnitude ".")
+                           (Double/parseDouble magnitude)
+                           (Long/parseLong magnitude))
+                         :cljs
+                         (js/parseFloat magnitude)) 
             measurement (and measurement
                              (keyword measurement))]
         (Unit. magnitude measurement))
@@ -397,18 +453,33 @@
                        :expected
                        `(~'re-matches ~unit-re ~s)})))))
 
-(extend-type string
-  IUnit
-  (-unit [this]
-    (parse-unit this))
+#?(:clj
+   (extend-type String
+     IUnit
+     (-unit [this]
+       (parse-unit this))
 
-  IMagnitude
-  (-magnitude [this]
-    (.-magnitude ^Unit (parse-unit this)))
+     IMagnitude
+     (-magnitude [this]
+       (.-magnitude ^Unit (parse-unit this)))
 
-  IMeasurement
-  (-measurement [this]
-    (.-measurement ^Unit (parse-unit this))))
+     IMeasurement
+     (-measurement [this]
+       (.-measurement ^Unit (parse-unit this))))
+
+   :cljs
+   (extend-type string
+     IUnit
+     (-unit [this]
+       (parse-unit this))
+
+     IMagnitude
+     (-magnitude [this]
+       (.-magnitude ^Unit (parse-unit this)))
+
+     IMeasurement
+     (-measurement [this]
+       (.-measurement ^Unit (parse-unit this)))))
 
 
 ;;; Keyword
