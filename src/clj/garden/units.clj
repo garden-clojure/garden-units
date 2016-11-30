@@ -78,7 +78,6 @@
               i# (convert mg# ms# ~measurement)]
           (Unit. i# ~measurement))))))
 
-
 ;;; Conversion
 
 (def
@@ -379,9 +378,9 @@
 ;; Protocol implementation
 
 
-;;; Long
+;;; Number
 
-(extend-type Long
+(extend-type Number
   IUnit
   (-unit [this]
     (Unit. this nil))
@@ -392,19 +391,6 @@
   IMeasurement
   (-measurement [this] nil))
 
-
-;;; Double
-
-(extend-type Double
-  IUnit
-  (-unit [this]
-    (Unit. this nil))
-
-  IMagnitude
-  (-magnitude [this] this)
-
-  IMeasurement
-  (-measurement [this] nil))
 
 ;;; Ratio
 
