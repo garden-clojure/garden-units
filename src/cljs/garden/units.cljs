@@ -382,7 +382,8 @@
     :doc "Regular expression for matching a CSS unit. The magnitude
   and unit are captured."}
   unit-re
-  #"([+-]?\d+(?:\.?\d+)?)(p[xtc]|in|[cm]m|%|r?em|ex|ch|v(?:[wh]|m(?:in|ax))|deg|g?rad|turn|m?s|k?Hz|dp(?:i|cm|px))?")
+  #"([+-]?\d+(?:\.?\d+(?:[eE][+-]?\d+)?)?)(p[xtc]|in|[cm]m|%|r?em|ex|ch|v(?:[wh]|m(?:in|ax))|deg|g?rad|turn|m?s|k?Hz|dp(?:i|cm|px))?")
+
 
 (defn ^Unit parse-unit [s]
   (let [s' (string/trim s)]

@@ -44,9 +44,11 @@
 ;; Functions
 
 (defn magnitude
-  "Return the magnitude of x. x must satisfy IMeasurement."
+  "Return the magnitude of `x`. `x` must satisfy IMagnitude and must a
+  finite numeric value."
   [x]
-  {:post [(number? %)]}
+  {:post [(number? %)
+          (Double/isFinite %)]}
   (-magnitude x))
 
 (defn measurement
@@ -417,7 +419,7 @@
     :doc "Regular expression for matching a CSS unit. The magnitude
   and unit are captured."}
   unit-re
-  #"([+-]?\d+(?:\.?\d+)?)(p[xtc]|in|[cm]m|%|r?em|ex|ch|v(?:[wh]|m(?:in|ax))|deg|g?rad|turn|m?s|k?Hz|dp(?:i|cm|px))?")
+  #"([+-]?\d+(?:\.?\d+(?:[eE][+-]?\d+)?)?)(p[xtc]|in|[cm]m|%|r?em|ex|ch|v(?:[wh]|m(?:in|ax))|deg|g?rad|turn|m?s|k?Hz|dp(?:i|cm|px))?")
 
 (defn ^Unit parse-unit [s]
   (let [s' (string/trim s)]
