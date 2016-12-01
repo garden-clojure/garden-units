@@ -1,18 +1,18 @@
 (ns garden.units
   "Utilities for working with units."
   (:refer-clojure :exclude [rem + * - /])
-  (:require
-   #?(:clj
-      [clojure.core :as clj]
+  #?@(:clj
+      [(:require
+        [clojure.core :as clj]
+        [clojure.string :as string])
+       (:import
+        (clojure.lang Keyword))]
       :cljs
-      [cljs.core :as clj])
-   [clojure.string :as string])
-  #?(:cljs
-     (:require-macros
-      [garden.units :refer [defunit]]))
-  #?(:clj
-     (:import
-      (clojure.lang Keyword))))
+      [(:require
+        [cljs.core :as clj]
+        [clojure.string :as string])
+       (:require-macros
+        [garden.units :refer [defunit]])]))
 
 ;; ---------------------------------------------------------------------
 ;; Protocols
