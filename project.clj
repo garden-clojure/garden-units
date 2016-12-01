@@ -5,37 +5,40 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
   :dependencies
-  [[org.clojure/clojure "1.6.0"]]
+  [[org.clojure/clojure "1.9.0-alpha13" :scope "provided"]
+   [org.clojure/clojurescript "1.9.293" :scope "provided"]]
 
   :source-paths
-  ["src/clj" "src/cljs"]
+  ["src"]
 
   :profiles
   {:dev
    {:dependencies
-    [[org.clojure/test.check "0.6.1"]
-     [org.clojure/clojurescript "0.0-2371"]
-     [weasel "0.4.2"]
-     [com.cemerick/piggieback "0.1.3"]]
+    [[com.cemerick/piggieback "0.2.1"]
+     [org.clojure/test.check "0.9.0"]]
 
     :source-paths
-    ["src/clj" "src/cljs" "dev"]
+    ["src" "dev"]
 
     :plugins
-    [[com.cemerick/austin "0.1.3"]
-     [lein-cljsbuild "1.0.3"]]
+    [[com.jakemccrary/lein-test-refresh "0.17.0"]
+     [lein-cljsbuild "1.1.4"]
+     [lein-codox "0.10.2"]
+     [lein-doo "0.1.7"]]
 
     :repl-options
     {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}}
 
   :aliases
-  {"auto-build"
-   ["do" ["cljsbuild" "clean"] ["cljsbuild" "auto" "dev"]]}
+  {"cljs-test"
+   ["doo" "node" "test" "once"]}
 
   :cljsbuild
-  {:builds [{:id "dev"
-             :source-paths ["src/clj" "src/cljs" "dev"]
-             :compiler {:output-to "resources/public/js/garden-units.dev.js"
-                        :output-dir "resources/public/js/out"
-                        :source-map "resources/public/js/garden-units.dev.js.map"
-                        :optimizations :none}}]})
+  {:builds [{:id "test"
+             :source-paths ["src" "test"]
+             :compiler {:main garden.test-runner
+                        :optimizations :none
+                        :output-dir "target/js/out"
+                        :output-to "target/js/garden-units.test.js"
+                        :source-map true
+                        :target :nodejs}}]})

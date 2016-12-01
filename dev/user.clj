@@ -1,9 +1,8 @@
-(ns user
+(ns ^:no-doc user
   (:require
-   [weasel.repl.websocket]
+   [cljs.repl]
+   [cljs.repl.node]
    [cemerick.piggieback]))
 
-(defn ws-repl []
-  (cemerick.piggieback/cljs-repl
-   :repl-env (weasel.repl.websocket/repl-env
-              :ip "0.0.0.0" :port 9123)))
+(defn node-repl []
+  (cemerick.piggieback/cljs-repl (cljs.repl.node/repl-env)))

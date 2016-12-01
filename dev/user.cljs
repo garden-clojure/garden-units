@@ -1,4 +1,4 @@
-(ns user
+(ns ^:no-doc user
   (:require
    [weasel.repl :as ws-repl]))
 
