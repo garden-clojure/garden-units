@@ -57,7 +57,10 @@
   "Return the magnitude of x. x must satisfy IMeasurement."
   [x]
   {:post [(number? %)
-          #?(:clj (Double/isFinite %))]}
+          #?@(:clj [(not= % Double/POSITIVE_INFINITY)
+                    (not= % Double/NEGATIVE_INFINITY)
+                    (not= % Double/NaN)
+                    (not= % Float/NaN)])]}
   (-magnitude x))
 
 (defn measurement
